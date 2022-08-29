@@ -37,6 +37,32 @@ func main() {
 }
 ```
 
+### 发布自己的包
+
+为了方便本地的开发与测试，需要mod来管理工程。
+
+![img.png](img.png)
+
+否则会发生下面错误，始终无法导入依赖！！！
+
+![](module错误.png)
+
+
+#### 发布新版本
+
+指定版本号
+
+```shell
+git tag v0.0.4
+```
+
+推送上去
+```shell
+git push --tags
+```
+
+
+
 ### License
 
 Copyright (c) 2019 by [zheng-ji](http://zheng-ji.info) released under MIT License.
