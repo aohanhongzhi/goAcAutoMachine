@@ -74,6 +74,8 @@ func (ac *AcAutoMachine) Query(content string) (results []Result) {
 	chars := []rune(content)
 	iter := ac.root
 	var start, end int
+
+	ResultMap := make(map[int]Result)
 	for i, c := range chars {
 		_, ok := iter.next[c]
 		for !ok && iter != ac.root {
@@ -85,16 +87,21 @@ func (ac *AcAutoMachine) Query(content string) (results []Result) {
 			}
 			iter = iter.next[c]
 			if iter.isPattern {
+
 				end = i // this is the end match, record one result
 				result := Result{
 					Key:   string([]rune(content)[start : end+1]),
 					Start: start,
 					End:   end + 1,
 				}
-				// results = append(results, string([]rune(content)[start:end+1]))
-				results = append(results, result)
+				ResultMap[start] = result
 			}
 		}
 	}
+
+	for _, v := range ResultMap {
+		results = append(results, v)
+	}
+
 	return
 }
