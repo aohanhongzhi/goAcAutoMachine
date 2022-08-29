@@ -98,3 +98,44 @@ func (ac *AcAutoMachine) Query(content string) (results []Result) {
 	}
 	return
 }
+
+// 仅匹配最长的关键字
+func (ac *AcAutoMachine) QueryLast(content string) (results []Result) {
+	chars := []rune(content)
+	iter := ac.root
+	var start, lastStart, end int
+	var lastResult Result // cant remove!!!
+	var result Result
+	for i, c := range chars {
+		_, ok := iter.next[c]
+		for !ok && iter != ac.root {
+			iter = iter.fail
+		}
+		if _, ok = iter.next[c]; ok {
+			if iter == ac.root { // this is the first match, record the start position
+				start = i
+				result = Result{}
+			}
+			iter = iter.next[c]
+			if iter.isPattern {
+				end = i // this is the end match, record one result
+				result = Result{
+					Key:   string([]rune(content)[start : end+1]),
+					Start: start,
+					End:   end + 1,
+				}
+				lastResult = result
+			}
+		}
+
+		// 结束或者lastStart变了
+		if i == len(chars)-1 || lastStart != start {
+			if (lastResult != Result{}) {
+				results = append(results, lastResult)
+			}
+		}
+
+		lastStart = start
+	}
+	return
+}
