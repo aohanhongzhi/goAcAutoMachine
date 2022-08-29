@@ -61,6 +61,9 @@ git tag v0.0.4
 git push --tags
 ```
 
+#### 其他工程里使用
+
+![img_1.png](img_1.png)
 
 
 ### License
