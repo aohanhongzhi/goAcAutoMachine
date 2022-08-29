@@ -98,7 +98,7 @@ func (ac *AcAutoMachine) Query(content string) (results []Result) {
 			}
 		}
 	}
-
+	// 这个最后是乱序的
 	for _, v := range ResultMap {
 		results = append(results, v)
 	}
