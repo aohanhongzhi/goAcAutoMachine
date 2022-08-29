@@ -1,4 +1,4 @@
-module ac
+module github.com/aohanhongzhi/goAcAutoMachine
 
 go 1.19
 
