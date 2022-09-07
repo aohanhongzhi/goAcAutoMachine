@@ -2,6 +2,7 @@ package goAcAutoMachine
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -44,4 +45,115 @@ func TestAc(t *testing.T) {
 	for _, result := range results {
 		fmt.Println(result)
 	}
+}
+
+func TestAcAndContain(t *testing.T) {
+
+	var whyWord = []string{}
+
+	whyWord = append(whyWord, "能不能派送")
+	whyWord = append(whyWord, "是不是丢了")
+	whyWord = append(whyWord, "停发了吗")
+	whyWord = append(whyWord, "还没有退回")
+	whyWord = append(whyWord, "还没退回")
+	whyWord = append(whyWord, "为何退回")
+	whyWord = append(whyWord, "为什么退回")
+	whyWord = append(whyWord, "什么退回")
+	whyWord = append(whyWord, "怎么退回")
+	whyWord = append(whyWord, "怎么回事")
+	whyWord = append(whyWord, "什么情况")
+	whyWord = append(whyWord, "什么原因")
+	whyWord = append(whyWord, "查物流")
+	whyWord = append(whyWord, "物流信息")
+	whyWord = append(whyWord, "更新物流")
+	whyWord = append(whyWord, "查快递")
+	whyWord = append(whyWord, "查一下")
+	whyWord = append(whyWord, "位置")
+	whyWord = append(whyWord, "快递到哪")
+	whyWord = append(whyWord, "核实物流")
+	whyWord = append(whyWord, "核实一下物流")
+	whyWord = append(whyWord, "核实一下信息")
+	whyWord = append(whyWord, "核实退回原因")
+	whyWord = append(whyWord, "核实退回")
+	whyWord = append(whyWord, "核实好了吗")
+	whyWord = append(whyWord, "核实什么情况没有转出")
+	whyWord = append(whyWord, "不走件")
+	whyWord = append(whyWord, "物流不动")
+	whyWord = append(whyWord, "物流不更新")
+	whyWord = append(whyWord, "没更新物流")
+	whyWord = append(whyWord, "天没更新") // 六天没更新
+	whyWord = append(whyWord, "不更新物流信息")
+	whyWord = append(whyWord, "这个件啥情况")
+	whyWord = append(whyWord, "是丢了吗")
+	whyWord = append(whyWord, "核实了吗")
+	whyWord = append(whyWord, "退回了吗")
+	whyWord = append(whyWord, "这个退回了")
+	whyWord = append(whyWord, "退回了吧")
+	whyWord = append(whyWord, "退回来了吧")
+	whyWord = append(whyWord, "退回来了吗")
+	whyWord = append(whyWord, "有回复吗")
+	whyWord = append(whyWord, "拦截成功了吗")
+	whyWord = append(whyWord, "是否拦截")
+	whyWord = append(whyWord, "是否已经拦截")
+	whyWord = append(whyWord, "是否已经退回")
+	whyWord = append(whyWord, "是否拦截")
+	whyWord = append(whyWord, "咋回事")
+	whyWord = append(whyWord, "停发吗")
+	whyWord = append(whyWord, "是否退回")
+	whyWord = append(whyWord, "显示取消寄件")
+	whyWord = append(whyWord, "中转错了吗")
+	whyWord = append(whyWord, "错分了吗")
+	whyWord = append(whyWord, "咋疑难")
+	whyWord = append(whyWord, "疑难核实")
+	whyWord = append(whyWord, "核实疑难")
+	whyWord = append(whyWord, "核实下疑难件")
+	whyWord = append(whyWord, "疑难原因")
+	whyWord = append(whyWord, "查的怎么样了")
+	whyWord = append(whyWord, "退了吗")
+	whyWord = append(whyWord, "退回单号")
+	whyWord = append(whyWord, "收件人没收到")
+	whyWord = append(whyWord, "没收到") // FIXME  没收到 退回 。这句话，应该强调退回
+	whyWord = append(whyWord, "未收到")
+	whyWord = append(whyWord, "是在退回")   // 是在退回吗
+	whyWord = append(whyWord, "没找到")    // 是在退回吗
+	whyWord = append(whyWord, "没有退回信息") // 没有退回信息
+	whyWord = append(whyWord, "正常在运输吗")
+	whyWord = append(whyWord, "在正常运输吗")
+	whyWord = append(whyWord, "在运输吗")
+	whyWord = append(whyWord, "退回么")
+	whyWord = append(whyWord, "退回了么")
+	whyWord = append(whyWord, "不动了")
+	whyWord = append(whyWord, "没有收到货物")
+	whyWord = append(whyWord, "为啥取消寄件")
+	whyWord = append(whyWord, "为啥取消拦截")
+	whyWord = append(whyWord, "为啥拦截")
+	whyWord = append(whyWord, "为啥退回")
+	whyWord = append(whyWord, "签收未收到")
+	whyWord = append(whyWord, "发货了吗")
+	var whyWordAC *AcAutoMachine
+
+	whyWordAC = NewAcAutoMachine()
+	for _, ww := range whyWord {
+		whyWordAC.AddPattern(ww)
+	}
+	whyWordAC.Build()
+	msg := "不更新物流已退款找到退回找不到记丢件;"
+	whyWordContain := false
+	acWhyWordContain := false
+	for _, value := range whyWord {
+		if strings.Contains(msg, value) {
+			whyWordContain = true
+			break
+		}
+	}
+
+	results := whyWordAC.QueryLast(msg)
+	if results != nil {
+		acWhyWordContain = true
+	}
+
+	if acWhyWordContain != whyWordContain {
+		println("Ac自动机(%v)和Contains(%v)算法不一样 %v", acWhyWordContain, whyWordContain, msg)
+	}
+
 }
