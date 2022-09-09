@@ -7,15 +7,16 @@ import (
 )
 
 func TestAc(t *testing.T) {
-	//content := "JT11111111，JT11111111，JT11111111取消拦截，JT7778888改地址，JT7778888改地址，  JT7778888催促,JT7778888改地址， ,JT121233444取消改地址 ,111查重量 ,111查询重量,,JT11111111消拦截，"
+	content := "JT11111111，JT11111111，JT11111111取消拦截，JT7778888改地址，JT7778888改地址，  JT7778888催促,JT7778888改地址， ,JT121233444取消改地址 ,111查重量 ,111查询重量,,JT11111111消拦截，"
 	//content := "JT1取消拦截,JT44取消改地址"
-	content := "JT11111111JT11111111撤消改地址，JT11111111，JT11111111取消拦截，JT7778888改地址，JT7778888改地址，  JT7778888催促,JT7778888改地址， ,JT121233444取消改地址 ,111查重量 ,111查询重量,,JT11111111消拦截，"
+	//content := "JT11111111JT11111111撤消改地址，JT11111111，JT11111111取消拦截，JT7778888改地址，JT7778888改地址，  JT7778888催促,JT7778888改地址， ,JT121233444取消改地址 ,111查重量 ,111查询重量,,JT11111111消拦截，"
 	//content := "JT11111111撤,JT11111111撤消改地址,JT11111111撤,JT11111111撤消改地址"
 	//content = "JT11111111撤,JT11111111撤消改地，,JT11111111撤,JT11111111撤消改地址"
 
 	//content := "JT11111111JT11111111撤消改地址，JT11111111，JT11111111取消拦截，JT7778888改地址，JT7778888改地址，  JT7778888催促,JT7778888改地址， ,JT121233444取消改地址 ,111查重量 ,111查询重量,,JT11111111消拦截，"
 	//content := "JT11111111撤,JT11111111撤消改地址,JT11111111撤,JT11111111撤消改地址"
 	//content = "JT11111111撤,JT11111111撤消改地，,JT11111111撤,JT11111111撤消改地址"
+	content = "取消改地址"
 
 	ac := NewAcAutoMachine()
 	ac.AddPattern("拦截")
@@ -34,17 +35,17 @@ func TestAc(t *testing.T) {
 	ac.AddPattern("催促")
 	ac.AddPattern("撤")
 	ac.Build()
-	//results := ac.Query(content)
-	//fmt.Println("内容: " + content)
-	//for _, result := range results {
-	//	fmt.Println(result)
-	//}
-
-	results := ac.QueryLast(content)
-	fmt.Println("=============")
+	results := ac.Query(content)
+	fmt.Println("内容: " + content)
 	for _, result := range results {
 		fmt.Println(result)
 	}
+
+	//results1 := ac.QueryLast(content)
+	//fmt.Println("=============")
+	//for _, result := range results1 {
+	//	fmt.Println(result)
+	//}
 }
 
 func TestAcAndContain(t *testing.T) {
@@ -138,22 +139,48 @@ func TestAcAndContain(t *testing.T) {
 	}
 	whyWordAC.Build()
 	msg := "不更新物流已退款找到退回找不到记丢件;"
+	msg = "长时间不更新物流找到退回找不到记丢件;"
 	whyWordContain := false
 	acWhyWordContain := false
 	for _, value := range whyWord {
 		if strings.Contains(msg, value) {
 			whyWordContain = true
+			println("包含的是", value)
 			break
 		}
 	}
 
+	result := whyWordAC.Query(msg)
+	if result != nil {
+		println("最短匹配到了")
+	}
 	results := whyWordAC.QueryLast(msg)
 	if results != nil {
 		acWhyWordContain = true
 	}
 
 	if acWhyWordContain != whyWordContain {
-		println("Ac自动机(%v)和Contains(%v)算法不一样 %v", acWhyWordContain, whyWordContain, msg)
+		println("Ac自动机(", acWhyWordContain, ")和Contains(", whyWordContain, ")算法不一样 ", msg)
 	}
 
+}
+
+func TestSimple(t *testing.T) {
+	machine := NewAcAutoMachine()
+
+	machine.AddPattern("更新")
+	machine.AddPattern("不更新")
+
+	machine.Build()
+
+	msg := "不更新物流"
+	results := machine.Query(msg)
+	for _, result := range results {
+		println("====>", result.Key)
+	}
+	last := machine.QueryLast(msg)
+
+	for _, l := range last {
+		println("====>", l.Key)
+	}
 }
