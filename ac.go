@@ -3,14 +3,14 @@ package goAcAutoMachine
 type AcNode struct {
 	fail      *AcNode
 	isPattern bool
-	next      map[rune]*AcNode
+	node      map[rune]*AcNode
 }
 
 func newAcNode() *AcNode {
 	return &AcNode{
 		fail:      nil,
 		isPattern: false,
-		next:      map[rune]*AcNode{},
+		node:      map[rune]*AcNode{},
 	}
 }
 
@@ -34,10 +34,10 @@ func (ac *AcAutoMachine) AddPattern(pattern string) {
 	chars := []rune(pattern)
 	iter := ac.root
 	for _, c := range chars {
-		if _, ok := iter.next[c]; !ok {
-			iter.next[c] = newAcNode()
+		if _, ok := iter.node[c]; !ok {
+			iter.node[c] = newAcNode()
 		}
-		iter = iter.next[c]
+		iter = iter.node[c]
 	}
 	iter.isPattern = true
 }
@@ -49,14 +49,14 @@ func (ac *AcAutoMachine) Build() {
 		parent := queue[0]
 		queue = queue[1:]
 
-		for char, child := range parent.next {
+		for char, child := range parent.node {
 			if parent == ac.root {
 				child.fail = ac.root
 			} else {
 				failAcNode := parent.fail
 				for failAcNode != nil {
-					if _, ok := failAcNode.next[char]; ok {
-						child.fail = failAcNode.next[char]
+					if _, ok := failAcNode.node[char]; ok {
+						child.fail = failAcNode.node[char]
 						break
 					}
 					failAcNode = failAcNode.fail
@@ -74,16 +74,17 @@ func (ac *AcAutoMachine) Query(content string) (results []Result) {
 	chars := []rune(content)
 	iter := ac.root
 	var start, end int
-	for i, c := range chars {
-		_, ok := iter.next[c]
+	for i, value := range chars {
+		c := value // 方便debug，赋值每次都跳转到这里
+		_, ok := iter.node[c]
 		for !ok && iter != ac.root {
 			iter = iter.fail
 		}
-		if _, ok = iter.next[c]; ok {
+		if _, ok = iter.node[c]; ok {
 			if iter == ac.root { // this is the first match, record the start position
 				start = i
 			}
-			iter = iter.next[c]
+			iter = iter.node[c]
 			if iter.isPattern {
 				end = i // this is the end match, record one result
 				result := Result{
@@ -107,16 +108,16 @@ func (ac *AcAutoMachine) QueryLast(content string) (results []Result) {
 	var lastResult Result // cant remove!!!
 	var result Result
 	for i, c := range chars {
-		_, ok := iter.next[c]
+		_, ok := iter.node[c]
 		for !ok && iter != ac.root {
 			iter = iter.fail
 		}
-		if _, ok = iter.next[c]; ok {
+		if _, ok = iter.node[c]; ok {
 			if iter == ac.root { // this is the first match, record the start position
 				start = i
 				result = Result{}
 			}
-			iter = iter.next[c]
+			iter = iter.node[c]
 			if iter.isPattern {
 				end = i // this is the end match, record one result
 				result = Result{

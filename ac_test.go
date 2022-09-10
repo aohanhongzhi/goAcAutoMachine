@@ -170,6 +170,7 @@ func TestSimple(t *testing.T) {
 
 	machine.AddPattern("更新")
 	machine.AddPattern("不更新")
+	machine.AddPattern("不更")
 
 	machine.Build()
 
