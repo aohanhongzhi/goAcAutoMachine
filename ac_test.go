@@ -185,3 +185,23 @@ func TestSimple(t *testing.T) {
 		println("====>", l.Key)
 	}
 }
+
+func TestAcAutoMachine_AddPatternLastMatch(t *testing.T) {
+	machine := NewAcAutoMachine()
+
+	machine.AddPattern("这个退回了")
+	machine.AddPattern("退回来了吗")
+
+	machine.Build()
+
+	msg := "这个退回来了吗"
+	results := machine.Query(msg)
+	for _, result := range results {
+		println("====>", result.Key)
+	}
+	last := machine.QueryLast(msg)
+
+	for _, l := range last {
+		println("====>", l.Key)
+	}
+}
