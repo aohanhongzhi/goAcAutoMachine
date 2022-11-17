@@ -1,16 +1,18 @@
 package goAcAutoMachine
 
 type AcNode struct {
-	fail      *AcNode
-	isPattern bool
-	next      map[rune]*AcNode
+	fail        *AcNode
+	isPattern   bool
+	next        map[rune]*AcNode
+	PatternList []string
 }
 
 func newAcNode() *AcNode {
 	return &AcNode{
-		fail:      nil,
-		isPattern: false,
-		next:      map[rune]*AcNode{},
+		fail:        nil,
+		isPattern:   false,
+		next:        map[rune]*AcNode{},
+		PatternList: []string{},
 	}
 }
 
@@ -40,6 +42,7 @@ func (ac *AcAutoMachine) AddPattern(pattern string) {
 		iter = iter.next[c]
 	}
 	iter.isPattern = true
+	iter.PatternList = append(iter.PatternList, pattern)
 }
 
 func (ac *AcAutoMachine) Build() {
@@ -99,8 +102,8 @@ func (ac *AcAutoMachine) Query(content string) (results []Result) {
 	return
 }
 
-// 仅匹配最长的关键字
-func (ac *AcAutoMachine) QueryLast(content string) (results []Result) {
+// 仅匹配最长的关键字 有问题
+func (ac *AcAutoMachine) QueryLong(content string) (results []Result) {
 	chars := []rune(content)
 	iter := ac.root
 	var start, lastStart, end int
@@ -123,6 +126,61 @@ func (ac *AcAutoMachine) QueryLast(content string) (results []Result) {
 					Key:   string([]rune(content)[start : end+1]),
 					Start: start,
 					End:   end + 1,
+				}
+
+				// lastStart变了
+				if lastStart != start {
+					if (lastResult != Result{} && lastResult.Start != start) {
+						results = append(results, lastResult)
+						lastResult = Result{}
+					}
+				}
+
+				lastResult = result
+				lastStart = start
+
+			}
+		}
+
+		// 结束
+		if i == len(chars)-1 {
+			if (lastResult != Result{}) {
+				results = append(results, lastResult)
+			}
+		}
+
+	}
+	return
+}
+
+// 仅匹配最长的关键字
+func (ac *AcAutoMachine) QueryLast(content string) (results []Result) {
+	chars := []rune(content)
+	iter := ac.root
+	var start, lastStart, end int
+	var lastResult Result // cant remove!!!
+	var result Result
+	for i, c := range chars {
+		_, ok := iter.next[c]
+		if !ok && iter != ac.root {
+			iter = iter.fail
+		}
+		if _, ok = iter.next[c]; ok {
+			iter = iter.next[c]
+			if iter.isPattern {
+				end = i // this is the end match, record one result
+				keyPattern := ""
+				for _, pattern := range iter.PatternList {
+					if len(pattern) > len(keyPattern) {
+						keyPattern = pattern
+					}
+				}
+				if len(keyPattern) > 0 {
+					result = Result{
+						Key:   keyPattern,
+						Start: end + 1 - len(keyPattern),
+						End:   end + 1,
+					}
 				}
 
 				// lastStart变了
